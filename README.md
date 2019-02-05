@@ -13,12 +13,13 @@ To use this app you have to navigate to the file in your terminal. Then your com
 ##### concert-this
 
 1. node liri.js concert-this "your-artist-choice"
+
     For this command you will get in return 
     1. Name of Venue
     2. Venue Location
     3. Date of the Event (MM/DD/YYYY Format)
 
-![step one](./images/1concertThis.jpg)
+![step one](./images/concert.gif)
 
 ##### spotify-this-song
 
