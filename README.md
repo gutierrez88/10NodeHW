@@ -18,7 +18,7 @@ To use this app you have to navigate to the file in your terminal. Then your com
     2. Venue Location
     3. Date of the Event (MM/DD/YYYY Format)
 
-(./images/1concertThis)
+![step one](./images/1concertThis)
 
 ##### spotify-this-song
 
