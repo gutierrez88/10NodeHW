@@ -6,6 +6,16 @@ var Spotify = require("node-spotify-api");
 var moment = require("moment");
 var spotify = new Spotify(keys.spotify);
 var readArr = [];
+var saveArr = [];
+
+function saveIt(){
+    
+    fs.appendFile("sample.txt", saveArr, function(err) {
+        if (err) {
+        console.log(err);
+        };
+    });
+};
 
 function concertThis(){
     var posArt = process.argv.slice(3).join(" ");
@@ -20,25 +30,36 @@ function concertThis(){
     }else{
         console.log("Please let me know who you would like to see.");
     };
+    
+    saveArr = ["### -concert-this: " + artist];
 
     function run() {
         axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp").then(function(res){
             var response = res.data;
             for (i = 0; i < response.length; i++ ){
-
+                
                 var date = moment(response[i].datetime, moment.HTML5_FMT.DATETIME_LOCAL).format("MM/DD/YYYY");
-                console.log("--------------------------------------------------------------");
-                console.log("Venue: " + response[i].venue.name);
-                console.log("City: " + response[i].venue.city);
-                console.log("Country: " + response[i].venue.country);
+                var venue = response[i].venue.name;
+                var city = response[i].venue.city;
+                var country = response[i].venue.country;
+                
+                
+
+                saveArr.push((i+1) + " -Venue: " + venue + " -City: " + city + " -Country: " + country + " -When: " + date + "|||");
+
+                console.log("------------------------");
+                console.log("Venue: " + venue);
+                console.log("City: " + city);
+                console.log("Country: " + country);
                 console.log("When: " + date);
                 
                 if (i == (response.length -1)) {
-                    console.log("--------------------------------------------------------------");
+                    console.log("------------------------");
                     console.log("The End!");
-
                 };
             };
+
+            saveIt();
         }).catch(function(err){
             console.log(err);
         });
@@ -48,13 +69,15 @@ function concertThis(){
 function spotifyThisSong(){
     var possible = process.argv.slice(3).join(" ");
     var song = "The Sign";
-
+    
     if (process.argv[3] != undefined){
         song = possible;
-    }else if (readArr != []){
-        song = readArr[0];
+    }else if (readArr[0] === "spotify-this-song"){
+        song = readArr[1];
     };
-        
+
+    saveArr = ["### -spotifyThisSong: " + song];   
+    
     spotify.search({
         type: "track",
         query: song,
@@ -64,57 +87,93 @@ function spotifyThisSong(){
             console.log("Error occurred: " + err);
         };
 
+        var info = data.tracks.items;
+
         if (song != "The Sign"){
-            for (j = 0; j < data.tracks.items.length; j++){
+            for (j = 0; j < info.length; j++){
+
+                var artist = info[j].artists[0].name;
+                var track = info[j].name;
+                var url = info[j].preview_url;
+                var album = info[j].album.name;
+                
+                saveArr.push(" -Artist: " + artist + " -Song: " + track + " -Preview Song URL: " + url + " -Album: " + album + "|||");
+                
                 console.log("-------------------------------------------------");
-                console.log("Artist: " + data.tracks.items[j].artists[0].name);
-                console.log("Song: " + data.tracks.items[j].name);
-                console.log("Preview Song Link: " + data.tracks.items[j].preview_url);
-                console.log("Album: " + data.tracks.items[j].album.name);
+                console.log("Artist: " + artist);
+                console.log("Song: " + track);
+                console.log("Preview Song Link: " + url);
+                console.log("Album: " + album);
             };
-            if (j = (data.tracks.items.length -1)){
+            if (j = (info.length -1)){
                 console.log("-------------------------------------------------");
                 console.log("Thats all I've got!");
             };
         }else{ 
-                console.log("-------------------------------------------------");
-                console.log("Artist: " + data.tracks.items[9].artists[0].name);
-                console.log("Song: " + data.tracks.items[9].name);
-                console.log("Preview Song Link: " + data.tracks.items[9].preview_url);
-                console.log("Album: " + data.tracks.items[9].album.name);
-                console.log("-------------------------------------------------");
+
+            var artist = info[9].artists[0].name;
+            var track = info[9].name;
+            var url = info[9].preview_url;
+            var album = info[9].album.name;
+                
+            saveArr.push(" -Artist: " + artist + " -Song: " + track + " -Preview Song URL: " + url + " -Album: " + album + "|||");
+
+            console.log("-------------------------------------------------");
+            console.log("Artist: " + info[9].artists[0].name);
+            console.log("Song: " + info[9].name);
+            console.log("Preview Song Link: " + info[9].preview_url);
+            console.log("Album: " + info[9].album.name);
+            console.log("-------------------------------------------------");
         };
+
+        saveIt();
     });
 };
 
 function movieThis(){
     var posMovie = process.argv.slice(3).join("+");
     var movie = "mr nobody";
+
     if (process.argv[3] != undefined){
         movie = posMovie;
-    }else if (readArr != []){
-        movie = readArr[0];
+    }else if (readArr[0] === "movie-this"){
+        movie = readArr[1];
+        run();
     };
+
+    saveArr = ["### -movie-this: " + movie];
 
     axios.get("http://www.omdbapi.com/?t=" + movie + "&plot=short&apikey=trilogy").then(function(res){
         var response = res.data;
-            
+
+        var title = response.Title;
+        var year =response.Year;
+        var imdbRating = response.Ratings[0].Value;
+        var rtr = response.Ratings[1].Value;
+        var country = response.Country;
+        var language = response.Language;
+        var plot = response.Plot;
+        var cast = response.Actors;
+
+        saveArr.push(" -Title: " + title + " -Year: " + year + " -IMDB Rating: " + imdbRating + " -Rotten Tomatoes Rating: " + rtr + " -Country Produce in: " + country + " -Language: " + language + " -Plot: " + plot + " -Cast: " + cast + "|||");
+
         console.log("--------------------------------------------------------------");
         console.log("Title: " + response.Title);
         console.log("Year: " + response.Year);
-        console.log("IMDB Rating: " + response.Ratings[0].value);
-        console.log("Rotten Tomatoes Rating: " + response.Ratings[1].value);
+        console.log("IMDB Rating: " + response.Ratings[0].Value);
+        console.log("Rotten Tomatoes Rating: " + response.Ratings[1].Value);
         console.log("Country Produced in: " + response.Country);
         console.log("Language: " + response.Language);
         console.log("Plot: " + response.Plot);
         console.log("Cast: " + response.Actors);
         console.log("--------------------------------------------------------------");
         console.log("The End!");
-            
+
+        saveIt();
     }).catch(function(err){
         console.log(err);   
     });
-}
+};
 
 function readThis(){
     fs.readFile("random.txt", "utf8", function(error, data) {
@@ -126,10 +185,12 @@ function readThis(){
         var dataArr = data.split(",");
         
         if(dataArr[0] === "spotify-this-song"){
+            readArr.push(dataArr[0]);
             readArr.push(dataArr[1]);
             spotifyThisSong();
         };
         if(dataArr[0] === "movie-this"){
+            readArr.push(dataArr[0]);
             readArr.push(dataArr[1]);
             movieThis();
         };
@@ -138,8 +199,7 @@ function readThis(){
             readArr.push(dataArr[1]);
             concertThis();
         };
-      
-      });
+    });
 };
  
 
@@ -163,5 +223,4 @@ switch (process.argv[2]){
     default:
         console.log("What can I help you with today?");
         break;
-
 };
