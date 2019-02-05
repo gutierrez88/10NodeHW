@@ -10,7 +10,7 @@ var saveArr = [];
 
 function saveIt(){
     
-    fs.appendFile("sample.txt", saveArr, function(err) {
+    fs.appendFile("log.txt", saveArr, function(err) {
         if (err) {
         console.log(err);
         };
